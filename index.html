@@ -103,7 +103,7 @@ const save=()=>{try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}};
 const sh=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const all=()=>Q.map((_,i)=>i);
 function fresh(){st={ph:"read",q:[...Array(N).keys()],i:0,pend:all(),qi:0,wrong:[],unk:all(),seen:[],read:[],round:0};save();draw()}
-function top(label,p){
+function hdr(label,p){
  const dots=S.map((_,i)=>{let c="";if(st.read.includes(i)){c="r";const ids=Q.map((x,n)=>x[0]==i?n:-1).filter(n=>n>=0);
   if(ids.some(n=>st.unk.includes(n)&&st.seen.includes(n)))c="w";else if(ids.every(n=>st.seen.includes(n)))c="g"}return `<b class="${c}" title="${S[i][0]}"></b>`}).join("");
  const m=Q.length-st.unk.length;
@@ -112,13 +112,13 @@ function draw(){
  if(!st||st.ph=="start"){$.innerHTML=`<div class="card c"><div class="big">📜</div><h1>Всесвітня історія, 9 клас</h1><p class="sm">§1–5: Французька революція, Наполеон, індустріальна революція, Велика Британія</p><p style="text-align:left">1) Читаєш короткі картки по темах (тільки головне)<br>2) Проходиш тест<br>3) Помилки → перечитуєш саме ці теми<br>4) Тест знову — і так, поки все не буде правильно</p>
  <button class="btn" onclick="fresh()">Почати</button>${st&&st.read?`<button class="btn s" onclick="st.ph='read';draw()">Продовжити</button>`:""}</div>`;if(!st)st={ph:"start",read:[]};return}
  if(st.ph=="read"){const s=S[st.q[st.i]];
-  $.innerHTML=top(`${st.round?"Перечитування":"Читання"}: ${st.i+1} з ${st.q.length}`,st.i/st.q.length*100)+`<div class="card"><div class="tag">${s[0]}</div><h2>${s[1]}</h2><ul>${s[2].map(x=>`<li>${x}</li>`).join("")}</ul></div>
+  $.innerHTML=hdr(`${st.round?"Перечитування":"Читання"}: ${st.i+1} з ${st.q.length}`,st.i/st.q.length*100)+`<div class="card"><div class="tag">${s[0]}</div><h2>${s[1]}</h2><ul>${s[2].map(x=>`<li>${x}</li>`).join("")}</ul></div>
   <button class="btn" onclick="readDone()">Прочитав ✓</button>${st.i?`<button class="btn s" onclick="st.i--;draw()">← Назад</button>`:""}`;scrollTo(0,0);return}
  if(st.ph=="quiz"){const n=st.pend[st.qi],q=Q[n];cur={n,o:sh(q.slice(2)),done:false};
-  $.innerHTML=top(`Тест: ${st.qi+1} з ${st.pend.length}${st.round?" (повтор помилок)":""}`,st.qi/st.pend.length*100)+`<div class="card"><div class="tag">${S[q[0]][0]}</div><h2>${q[1]}</h2><div id="o">${cur.o.map((t,k)=>`<button class="opt" onclick="ans(${k})">${t}</button>`).join("")}</div><div id="fb"></div></div>`;scrollTo(0,0);return}
+  $.innerHTML=hdr(`Тест: ${st.qi+1} з ${st.pend.length}${st.round?" (повтор помилок)":""}`,st.qi/st.pend.length*100)+`<div class="card"><div class="tag">${S[q[0]][0]}</div><h2>${q[1]}</h2><div id="o">${cur.o.map((t,k)=>`<button class="opt" onclick="ans(${k})">${t}</button>`).join("")}</div><div id="fb"></div></div>`;scrollTo(0,0);return}
  if(st.ph=="res"){const w=[...new Set(st.wrong.map(n=>Q[n][0]))];
-  $.innerHTML=top("Результат раунду",100)+`<div class="card c"><div class="big">🔁</div><h2>Помилок: ${st.wrong.length} з ${st.pend.length}</h2><p>Треба довчити:</p><p>${w.map(i=>`<b>${S[i][0]}</b> ${S[i][1]}`).join("<br>")}</p></div><button class="btn" onclick="relearn()">Перечитати ці теми</button>`;return}
- if(st.ph=="done"){$.innerHTML=top("Готово!",100)+`<div class="card c"><div class="big">🏆</div><h1>Усе засвоєно!</h1><p>Усі ${Q.length} питань відповіли правильно. Раундів повторення: ${st.round}.</p></div><button class="btn" onclick="st.ph='read';st.q=[...Array(N).keys()];st.i=0;st.round=0;st.pend=all();st.unk=all();st.seen=[];draw()">Пройти все ще раз</button><button class="btn s" onclick="st=null;try{localStorage.removeItem(K)}catch(e){};draw()">На початок</button>`}}
+  $.innerHTML=hdr("Результат раунду",100)+`<div class="card c"><div class="big">🔁</div><h2>Помилок: ${st.wrong.length} з ${st.pend.length}</h2><p>Треба довчити:</p><p>${w.map(i=>`<b>${S[i][0]}</b> ${S[i][1]}`).join("<br>")}</p></div><button class="btn" onclick="relearn()">Перечитати ці теми</button>`;return}
+ if(st.ph=="done"){$.innerHTML=hdr("Готово!",100)+`<div class="card c"><div class="big">🏆</div><h1>Усе засвоєно!</h1><p>Усі ${Q.length} питань відповіли правильно. Раундів повторення: ${st.round}.</p></div><button class="btn" onclick="st.ph='read';st.q=[...Array(N).keys()];st.i=0;st.round=0;st.pend=all();st.unk=all();st.seen=[];draw()">Пройти все ще раз</button><button class="btn s" onclick="st=null;try{localStorage.removeItem(K)}catch(e){};draw()">На початок</button>`}}
 function readDone(){const s=st.q[st.i];if(!st.read.includes(s))st.read.push(s);st.i++;
  if(st.i>=st.q.length){st.ph="quiz";st.qi=0;st.wrong=[];st.pend=sh(st.pend)}save();draw()}
 function ans(k){if(cur.done)return;cur.done=true;const q=Q[cur.n],ok=cur.o[k]==q[2];
